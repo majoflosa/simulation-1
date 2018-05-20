@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 import axios from 'axios';
+import noImg from '../../noimage.jpeg';
+import {Link} from 'react-router-dom';
 
 class Form extends Component {
     constructor(props) {
@@ -10,7 +12,12 @@ class Form extends Component {
             productName: '',
             price: 0,
             formAddButton: 'Add to Inventory',
-            currentProduct: this.props.currentProduct
+            // currentProduct: this.props.currentProduct,
+            styles: {
+                noImgStyle: { 
+                    backgroundImage: noImg
+                }
+            }
         };
 
         this.updateImageField = this.updateImageField.bind( this );
@@ -18,38 +25,71 @@ class Form extends Component {
         this.updatePriceField = this.updatePriceField.bind( this );
         this.resetFields = this.resetFields.bind( this );
         this.createNewProduct = this.createNewProduct.bind( this );
+        this.getProducts = this.getProducts.bind( this );
         this.saveUpdateChanges = this.saveUpdateChanges.bind( this );
     }
 
-    componentDidUpdate( oldProps ) {
-        if ( oldProps.currentProduct !== this.props.currentProduct ) {
-            this.setState({
-                imageUrl: this.props.currentProduct.image_url,
-                productName: this.props.currentProduct.product_name,
-                price: this.props.currentProduct.price,
-                formAddButton: 'Save Changes'
-            });
-
+    // componentDidUpdate( oldProps ) {
+    //     if ( oldProps.currentProduct !== this.props.currentProduct ) {
+    //         this.setState({
+    //             imageUrl: this.props.currentProduct.image_url,
+    //             productName: this.props.currentProduct.product_name,
+    //             price: this.props.currentProduct.price,
+    //             formAddButton: 'Save Changes',
+    //             styles: {
+    //                 noImgStyle: {
+    //                     backgroundImage: this.props.currentProduct.image_url 
+    //                 }
+    //             }
+    //         });
             
+    //         console.log( 'component did update.' );
+    //     }
+    // }
 
-            console.log( 'component did update.' );
+    componentDidUpdate( oldProps ) {
+        if ( oldProps.match.params.id !== this.props.match.params.id ) {
+            this.resetFields();
         }
     }
 
+    componentDidMount() {
+        if ( this.props.match.params.id ) {
+            axios.get( `/api/product/${this.props.match.params.id}` )
+                .then( response => {
+                    console.log( 'product data: ', response.data );
+                    let { image_url, product_name, price } = response.data[0];
+                    this.setState({
+                        imageUrl: image_url,
+                        productName: product_name,
+                        price: price,
+                        styles: {
+                            noImgStyle: {
+                                backgroundImage: `url(${image_url})`
+                            }
+                        }
+                    });
+                });
+        } else {
+            this.resetFields();
+        }
+
+    }
+
     saveUpdateChanges() {
-        console.log( 'saveUpdateChanges is running: ', this.props.currentProduct.id );
+        // console.log( 'saveUpdateChanges is running: ', this.props.currentProduct.id );
 
         let reqBody = {
-            id: this.props.currentProduct.id,
+            id: this.props.match.params.id,
             image_url: this.state.imageUrl,
             product_name: this.state.productName,
             price: this.state.price,
         };
 
-        axios.put( `/api/product/${this.props.currentProduct.id}`, reqBody )
+        axios.put( `/api/product/${this.props.match.params.id}`, reqBody )
             .then( response => {
                 console.log( 'updated successfully on frontend: ', response.data );
-                this.props.getProducts();
+                this.getProducts();
             })
             .catch( () => console.log( 'update failed on frontend' ) );
     }
@@ -66,6 +106,17 @@ class Form extends Component {
         this.setState({ price: e.target.value });
     }
 
+    getProducts() {
+        axios.get( '/api/inventory' )
+          .then( response => {
+            this.setState({ inventory: response.data })
+            console.log( 'response: ', response )
+          })
+          .catch( response => {
+            console.log('getProducts failed on front end: ', response);
+          } );
+    }
+
     createNewProduct() {
         let reqbody = {
             image_url: this.state.imageUrl,
@@ -75,7 +126,7 @@ class Form extends Component {
 
         axios.post( '/api/product', reqbody )
             .then( reponse => {
-                this.props.getProducts();
+                this.getProducts();
                 this.resetFields();
                 console.log( 'Product created successfully' );
             })
@@ -87,23 +138,71 @@ class Form extends Component {
             imageUrl: '',
             productName: '',
             price: 0,
-            currentProduct: null
+            // currentProduct: null,
+            formAddButton: 'Add to Inventory',
+            styles: {
+                noImgStyle: { 
+                    backgroundImage: noImg
+                }
+            }
         });
     }
     
     render() {
-        console.log( 'current state: ', 
-                `imageURL: ${this.state.imageUrl}, 
-                productName: ${this.state.productName},
-                price: ${this.state.price}` );
+        // console.log( 'current state: ', 
+        //         `imageURL: ${this.state.imageUrl}, 
+        //         productName: ${this.state.productName},
+        //         price: ${this.state.price}` );
 
-        let formAction = this.state.formAddButton === 'Add to Inventory' 
-                            ? this.createNewProduct 
-                            : this.saveUpdateChanges
+        // let formAction = this.props.currentProduct === null 
+        //                     ? this.createNewProduct 
+        //                     : this.saveUpdateChanges
+
+        // let formActionButton;
+        // let noImgDiv;
+        
+        // if ( this.props.currentProduct === null ) {
+            //     // formAction = this.createNewProduct;
+            //     formActionButton = (
+                //         <button 
+                //             onClick={ () => this.createNewProduct() } 
+                //             className="btn">{this.state.formAddButton}
+                //         </button>
+                //     );
+                
+                //     noImgDiv = <div className="noimage" style={ { backgroundImage: noImg } }></div>
+                // } else {
+                    //     // formAction = this.saveUpdateChanges;
+                    //     formActionButton = (
+                        //         <button 
+                        //             onClick={ () => this.saveUpdateChanges() } 
+                        //             className="btn">{this.state.formAddButton}
+                        //         </button>
+                        //     );
+                        
+                        //     noImgDiv = <div className="noimage" style={ { backgroundImage: this.props.currentProduct.image_url } }></div>
+                        // }
+                        
+        let formActionButton;
+        if ( this.props.match.params.id ) {
+            formActionButton = (
+                <Link to="/">
+                    <button onClick={ () => this.saveUpdateChanges() } className="btn">Save changes</button>
+                </Link>
+            );
+        } else {
+            // this.resetFields();
+            formActionButton = (
+                <Link to="/">
+                    <button onClick={ () => this.createNewProduct() } className="btn">Add to Inventory</button>
+                </Link>
+            );
+        }
     
         return (
             <div className="form-wrapper">
-                <div className="noimage"></div>
+                <div className="noimage" style={this.state.styles.noImgStyle}></div>
+                {/* {noImgDiv} */}
 
                 <div className="form-field">
                     <label htmlFor="image_url">Image URL:</label>
@@ -137,9 +236,11 @@ class Form extends Component {
 
                 <div className="form-buttons">
                     <button onClick={ this.resetFields } className="btn">Cancel</button>
-                    <button 
+                    { formActionButton }
+                    {/* <button 
                         onClick={ () => formAction() } 
-                        className="btn">{this.state.formAddButton}</button>
+                        className="btn">{this.state.formAddButton}
+                    </button> */}
                 </div>
             </div>
         );

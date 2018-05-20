@@ -12,17 +12,17 @@ massive( process.env.CONNECTION_STRING )
         console.log( 'Database connected successfully.' );
         app.set( 'db', db );
     } )
-    .catch( db => {
-        console.log( 'Retrying database connection.' );
-        app.set( 'db', db );
+    .catch( err => {
+        console.log( err );
     });
 
 app.use( json() );
 app.use( cors() );
 
 // endpoints
-const { getInventory, createProduct, updateProduct, deleteProduct } = require( `${__dirname}/controller.js` );
+const { getInventory, getProduct, createProduct, updateProduct, deleteProduct } = require( `${__dirname}/controller.js` );
 app.get( '/api/inventory', getInventory );
+app.get( '/api/product/:id', getProduct );
 app.post( '/api/product', createProduct );
 app.put( '/api/product/:id', updateProduct );
 app.delete( '/api/product/:id', deleteProduct );

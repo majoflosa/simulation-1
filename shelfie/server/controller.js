@@ -1,7 +1,7 @@
 const getInventory = ( req, res, next ) => {
-    if ( req.app.get( 'db' ).getInventoryQuery === undefined ) {
+    if ( req.app.get( 'db' ) === undefined ) {
         console.log( 'req.app.get(db) is undefined' );
-        console.log( req.app );
+        // console.log( req.app );
         return res.status(500).json({ app: req.app, message: 'req.app.get(db) is undefined' });
     }
 
@@ -15,6 +15,19 @@ const getInventory = ( req, res, next ) => {
             console.log( 'getInventory failed' );
             return res.status(500).json(response);
         });
+}
+
+const getProduct = ( req, res, next ) => {
+    req.app.get( 'db' )
+        .getProductQuery( req.params.id )
+        .then( response => {
+            console.log( 'getProduct successful' );
+            return res.status(200).json( response );
+        })
+        .catch( response => {
+            console.log( 'getProduct failed' );
+            return res.status(500).json( response );
+        })
 }
 
 const createProduct = ( req, res, next ) => {
@@ -57,6 +70,7 @@ const deleteProduct = ( req, res, next ) => {
 
 module.exports = {
     getInventory: getInventory,
+    getProduct: getProduct,
     createProduct: createProduct,
     updateProduct: updateProduct,
     deleteProduct: deleteProduct

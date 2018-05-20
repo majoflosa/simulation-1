@@ -9,30 +9,48 @@ class Dashboard extends Component {
         super(props);
 
         this.state = {
-            
+            inventory: []
         }
 
         this.deleteProduct = this.deleteProduct.bind( this );
+        this.getProducts = this.getProducts.bind( this );
+    }
+
+    getProducts() {
+        axios.get( '/api/inventory' )
+          .then( response => {
+            this.setState({ inventory: response.data })
+            console.log( 'response: ', response )
+          })
+          .catch( response => {
+            console.log('getProducts failed on front end: ', response);
+          } );
+    }
+
+    componentDidMount() {
+        this.getProducts();
+        console.log( 'component did mount' );
     }
 
     deleteProduct( id ) {
         axios.delete( `/api/product/${id}` )
             .then( response => {
                 console.log( 'deleteProduct successful on frontend' );
-                this.props.getProducts();
+                this.getProducts();
             })
     }
 
     render() {
         console.log( 'inventory: ', this.props.inventory)
-        let inventoryList = this.props.inventory.map( (item, ind) => {
+        let inventoryList = this.state.inventory.map( (item, ind) => {
             return (
                 <Product 
                     key={ind} 
                     inventoryItem={item}
                     getProducts={this.props.getProducts}
                     deleteProduct={this.deleteProduct}
-                    handleClickEdit={this.props.handleClickEdit}
+                    // handleClickEdit={this.props.handleClickEdit}
+                    // saveChanges={this.save}
                 />
             );
         })

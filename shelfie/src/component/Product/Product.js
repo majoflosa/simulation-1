@@ -1,4 +1,5 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
 
 function Product(props) {
     return (
@@ -8,8 +9,12 @@ function Product(props) {
                 <p className="product-name">{props.inventoryItem.product_name}</p>
                 <p className="product-price">${props.inventoryItem.price}</p>
                 <div className="product-buttons">
-                    <button onClick={ () => props.deleteProduct(props.inventoryItem.id) } className="btn">Delete</button>
-                    <button onClick={ () => props.handleClickEdit(props.inventoryItem) } className="btn">Edit</button>
+                    <Link to="/">
+                        <button onClick={ () => props.deleteProduct(props.inventoryItem.id) } className="btn">Delete</button>
+                    </Link>
+                    <Link to={`/edit-product/${props.inventoryItem.id}`}>
+                        <button className="btn">Edit</button>
+                    </Link>
                 </div>
             </div>
         </div>

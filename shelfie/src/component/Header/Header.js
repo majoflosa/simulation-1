@@ -10,8 +10,8 @@ function Header() {
                 <Link to="/"><span>SHELFIE</span></Link>
             </div>
             <nav>
-                <Link to="/dashboard">Dashboard</Link>
-                <Link to="/form">Add to Inventory</Link>
+                <Link to="/">Dashboard</Link>
+                <Link to="/new-product/">Add to Inventory</Link>
             </nav>
         </div>
     );
